@@ -23,5 +23,6 @@ export default {
     'Create a Cloudflare Tunnel': 'Создать Cloudflare Tunnel',
     'Github': 'Github',
     'Help and support this project by sponsoring us on': 'Помогите и поддержите этот проект, спонсируя нас на',
-    'All sponsors will be listed and featured here in the future.': 'Все спонсоры будут перечислены и представлены здесь в будущем.'
+    'All sponsors will be listed and featured here in the future.': 'Все спонсоры будут перечислены и представлены здесь в будущем.',
+    'Auto restart when cloudflared exits': 'Автоматический перезапуск при выходе cloudflared'
 }

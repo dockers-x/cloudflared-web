@@ -49,6 +49,10 @@
                   </Button>
                 </div>
               </div>
+              <div class="flex items-center space-x-2">
+                <Checkbox id="auto-restart" v-model="config.autoRestart" :disabled="config.start" />
+                <Label for="auto-restart">{{ $t('Auto restart when cloudflared exits') }}</Label>
+              </div>
             </div>
           </form>
         </CardContent>
@@ -145,6 +149,7 @@
   import {Label} from "radix-vue";
   import { Toaster } from '@/components/ui/sonner'
   import $i18n from './i18n.ts'
+  import { Checkbox } from '@/components/ui/checkbox'
   // import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
   // import {PrismEditor} from "vue-prism-editor";
   // import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
@@ -174,7 +179,12 @@
 
   const endpoint = "";
 
-  const config = reactive<{ config: string, token: string, start: boolean }>({config: '', token: '', start: false});
+  const config = reactive<{ config: string, token: string, start: boolean, autoRestart: boolean }>({
+    config: '', 
+    token: '', 
+    start: false,
+    autoRestart: false
+  });
 
   const token = ref<string>('');
 
@@ -204,7 +214,6 @@
 
 
   async function start() {
-
     config.start = !config.start;
     const res = await fetch(endpoint + '/start', {
       method: "POST",
@@ -212,17 +221,15 @@
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        start: config.start
+        start: config.start,
+        autoRestart: config.autoRestart
       })
     })
 
-
     if (res.status === 200) {
-
     } else {
       alert('Failed to Start!');
     }
-
   }
 
   async function save() {
@@ -273,6 +280,7 @@
     token.value = config.token;
 
     config.start = json.start;
+    config.autoRestart = json.autoRestart;
 
     watch(token, () => {
 
