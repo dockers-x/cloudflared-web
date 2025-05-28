@@ -60,7 +60,7 @@ app.get('/new-version', async (req, res) => {
 
   let latest_version = current_version;
   try {
-    const resp = await fetch('https://registry.hub.docker.com/v2/repositories/wisdomsky/cloudflared-web/tags/?page_size=100&page=1');
+    const resp = await fetch('https://registry.hub.docker.com/v2/repositories/czyt/cloudflared-web/tags/?page_size=100&page=1');
 
     const image_info = await resp.json();
 
@@ -77,21 +77,25 @@ app.get('/new-version', async (req, res) => {
 })
 
 app.post('/start', (req, res) => {
-
   let config = getConfig();
-
   const start = req.body.start; 
+  const autoRestart = req.body.autoRestart;
 
   try {
     if (start !== undefined && typeof start === 'boolean') {
       config.start = start;
-      saveConfig(config);
     }
+    if (autoRestart !== undefined && typeof autoRestart === 'boolean') {
+      config.autoRestart = autoRestart;
+    }
+    saveConfig(config);
     
+    tunnel.setAutoRestart(config.autoRestart);
     init(config, res);
     
-  } catch(e) {}
-  res.status(500).send();
+  } catch(e) {
+    res.status(500).send();
+  }
 })
 
 
@@ -166,7 +170,8 @@ app.listen(port, () => {
 function getConfig() {
   let config = {
     token: '',
-    start: false
+    start: false,
+    autoRestart: false
   };
   try {
     const json = JSON.parse(fs.readFileSync(configpath));

@@ -2,8 +2,14 @@ name: Build
 
 on:
   push:
-    branches:
-      - "main"
+    tags:
+      - "*"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   docker:
@@ -48,7 +54,7 @@ jobs:
           provenance: false
           push: true
           tags: |
-            wisdomsky/cloudflared-web:${{ env.DOCKER_TAG }},
-            wisdomsky/cloudflared-web:latest,
-            ghcr.io/wisdomsky/cloudflared-web:${{ env.DOCKER_TAG }},
-            ghcr.io/wisdomsky/cloudflared-web:latest
+            czyt/cloudflared-web:${{ env.DOCKER_TAG }},
+            czyt/cloudflared-web:latest,
+            ghcr.io/dockers-x/cloudflared-web:${{ env.DOCKER_TAG }},
+            ghcr.io/dockers-x/cloudflared-web:latest

@@ -29,9 +29,10 @@ class CloudflaredTunnel {
 
     constructor(cloudflaredPath = "cloudflared") {
         this.cloudflaredPath = cloudflaredPath;
-
         this.url = "http://localhost:80";
         this.hostname = "";
+        this.autoRestart = false;
+        this.manuallyStopped = false;
     }
 
     get token() {
@@ -56,6 +57,10 @@ class CloudflaredTunnel {
         this._token = token;
     }
 
+    setAutoRestart(autoRestart) {
+        this.autoRestart = autoRestart;
+    }
+
     checkInstalled() {
         return commandExistsSync(this.cloudflaredPath);
     }
@@ -65,7 +70,6 @@ class CloudflaredTunnel {
     }
 
     emitError(msg) {
-
         const imp_err_ids= [
             "ERR Unable to establish connection with Cloudflare edge",
             "ERR Failed to fetch features, default to disable error",
@@ -75,7 +79,6 @@ class CloudflaredTunnel {
         if (imp_err_ids.some(subStr => msg.includes(subStr))) {
             throw new Error(msg.split('ERR')[1].trim());
         }
-
     }
 
     start(additionalArgs = {}) {
@@ -94,6 +97,7 @@ class CloudflaredTunnel {
             return;
         }
 
+        this.manuallyStopped = false;
         const args = [
             "tunnel",
             "--no-autoupdate",
@@ -151,6 +155,13 @@ class CloudflaredTunnel {
         this.childProcess.on("close", (code) => {
             this.childProcess = null;
             this.emitChange("Stopped cloudflared", code);
+            // Auto restart if enabled and not manually stopped
+            if (this.autoRestart && !this.manuallyStopped) {
+                console.log("Auto restarting cloudflared...");
+                setTimeout(() => {
+                    this.start(additionalArgs);
+                }, 2000);
+            }
         });
 
         this.childProcess.on("error", (err) => {
@@ -171,6 +182,7 @@ class CloudflaredTunnel {
 
     stop() {
         this.emitChange("Stopping cloudflared");
+        this.manuallyStopped = true;
         if (this.childProcess) {
             this.childProcess.kill("SIGINT");
             this.childProcess = null;
